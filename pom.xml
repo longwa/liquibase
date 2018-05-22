@@ -4,7 +4,7 @@
 
     <groupId>org.liquibase</groupId>
     <artifactId>liquibase-parent</artifactId>
-    <version>3.5.6-SNAPSHOT</version>
+    <version>3.5.5-TRITON</version>
     <packaging>pom</packaging>
 
     <name>Liquibase Parent Configuration</name>
@@ -433,6 +433,11 @@
     </build>
 
     <distributionManagement>
+        <repository>
+            <id>lexmaven1.triu.com</id>
+            <name>lexmaven1.triu.com-releases</name>
+            <url>http://maven.triu.com/artifactory/libs-release-local</url>
+        </repository>
         <snapshotRepository>
             <id>lexmaven1.triu.com</id>
             <name>lexmaven1.triu.com-snapshots</name>
