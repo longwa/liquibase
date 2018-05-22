@@ -4,7 +4,6 @@ import liquibase.configuration.GlobalConfiguration;
 import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.logging.LogFactory;
 import liquibase.util.StringUtils;
-import liquibase.util.SpringBootFatJar;
 
 import java.io.File;
 import java.io.IOException;
@@ -85,7 +84,19 @@ public class ClassLoaderResourceAccessor extends AbstractResourceAccessor {
                 }
                 zipFilePath = URLDecoder.decode(zipFilePath, LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding());
 
-                path = SpringBootFatJar.getPathForResource(path);
+                // In some cases, there might be two ! in the path, such as when using spring-boot with mult-module projects
+                // In that case the file path will be something like "jar:file:foo/bar/project.war!/WEB-INF/classes!/dbmigrations/"
+                String extendedPath = null;
+                if (zipAndFile.length == 3) {
+                    extendedPath = zipAndFile[1];
+                    if (extendedPath.startsWith("/")) {
+                        extendedPath = extendedPath.substring(1);
+                    }
+                    if (!extendedPath.endsWith("/")) {
+                        extendedPath = extendedPath + "/";
+                    }
+                }
+
                 if (path.startsWith("classpath:")) {
                     path = path.replaceFirst("classpath:", "");
                 }
@@ -107,22 +118,25 @@ public class ClassLoaderResourceAccessor extends AbstractResourceAccessor {
                     while (entries.hasMoreElements()) {
                         JarEntry entry = entries.nextElement();
 
-                        if (entry.getName().startsWith(path)) {
+                        // If we had an extended path attribute (from spring-boot most likely)
+                        // then remove it for the match checking.
+                        String entryName = entry.getName();
+                        if (extendedPath != null) {
+                            entryName = entryName.replaceAll(extendedPath, "");
+                        }
 
+                        if (entryName.startsWith(path)) {
                             if (!recursive) {
-                                String pathAsDir = path.endsWith("/")
-                                        ? path
-                                        : path + "/";
-                                if (!entry.getName().startsWith(pathAsDir)
-                                 || entry.getName().substring(pathAsDir.length()).contains("/")) {
+                                String pathAsDir = path.endsWith("/") ? path : path + "/";
+                                if (!entryName.startsWith(pathAsDir) || entryName.substring(pathAsDir.length()).contains("/")) {
                                     continue;
                                 }
                             }
 
                             if (entry.isDirectory() && includeDirectories) {
-                                returnSet.add(entry.getName());
+                                returnSet.add(entryName);
                             } else if (includeFiles) {
-                                returnSet.add(entry.getName());
+                                returnSet.add(entryName);
                             }
                         }
                     }

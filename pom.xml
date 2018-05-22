@@ -433,15 +433,10 @@
     </build>
 
     <distributionManagement>
-        <repository>
-            <id>sonatype-nexus-staging</id>
-            <name>Sonatype Production Repository</name>
-            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2</url>
-        </repository>
         <snapshotRepository>
-            <id>sonatype-nexus-snapshots</id>
-            <name>Sontatype Snapshot Repository</name>
-            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+            <id>lexmaven1.triu.com</id>
+            <name>lexmaven1.triu.com-snapshots</name>
+            <url>http://maven.triu.com/artifactory/libs-snapshot-local</url>
         </snapshotRepository>
     </distributionManagement>
 
